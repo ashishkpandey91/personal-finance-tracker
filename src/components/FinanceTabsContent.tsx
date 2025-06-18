@@ -4,6 +4,7 @@ import { SpendingChart } from './SpendingChart';
 import { CategoryChart } from './CategoryChart';
 import { TransactionList } from './TransactionList';
 import { BudgetCard } from './BudgetCard';
+import { FinanceNews } from './FinanceNews';
 import { Transaction, Budget } from '@/types/finance';
 
 interface FinanceTabsContentProps {
@@ -54,6 +55,10 @@ export const FinanceTabsContent = ({ transactions, budgets, onUpdateBudget }: Fi
           <SpendingChart transactions={transactions} />
           <CategoryChart transactions={transactions} />
         </div>
+      </TabsContent>
+
+      <TabsContent value="news" className="space-y-6">
+        <FinanceNews />
       </TabsContent>
     </>
   );
