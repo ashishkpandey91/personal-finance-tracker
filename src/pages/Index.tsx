@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +9,7 @@ import { TransactionList } from '@/components/TransactionList';
 import { SpendingChart } from '@/components/SpendingChart';
 import { BudgetCard } from '@/components/BudgetCard';
 import { CategoryChart } from '@/components/CategoryChart';
+import { MobileBottomNav } from '@/components/MobileBottomNav';
 
 export interface Transaction {
   id: string;
@@ -66,6 +66,7 @@ const Index = () => {
 
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('week');
+  const [activeTab, setActiveTab] = useState('overview');
 
   const addTransaction = (transaction: Omit<Transaction, 'id' | 'timestamp'>) => {
     const newTransaction: Transaction = {
@@ -109,7 +110,7 @@ const Index = () => {
   const balance = totalIncome - totalExpenses;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pb-20 md:pb-8">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -176,9 +177,10 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm">
+        {/* Main Content with Desktop Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          {/* Desktop Tab List - Hidden on Mobile */}
+          <TabsList className="hidden md:grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="budgets">Budgets</TabsTrigger>
@@ -226,6 +228,9 @@ const Index = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Transaction Form Modal */}
         {showTransactionForm && (
