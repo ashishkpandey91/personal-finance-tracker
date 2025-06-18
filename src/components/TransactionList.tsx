@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Search, Filter, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
-import { Transaction } from '@/pages/Index';
+import { Transaction } from '@/types/finance';
 
 interface TransactionListProps {
   transactions: Transaction[];

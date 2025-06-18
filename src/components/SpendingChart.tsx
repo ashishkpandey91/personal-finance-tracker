@@ -1,7 +1,6 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Transaction } from '@/pages/Index';
+import { Transaction } from '@/types/finance';
 import { TrendingUp } from 'lucide-react';
 
 interface SpendingChartProps {

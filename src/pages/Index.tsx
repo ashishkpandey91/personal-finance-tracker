@@ -1,31 +1,12 @@
+
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Plus, TrendingUp, TrendingDown, DollarSign, Calendar, Search, Filter, PieChart } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TransactionForm } from '@/components/TransactionForm';
-import { TransactionList } from '@/components/TransactionList';
-import { SpendingChart } from '@/components/SpendingChart';
-import { BudgetCard } from '@/components/BudgetCard';
-import { CategoryChart } from '@/components/CategoryChart';
 import { MobileBottomNav } from '@/components/MobileBottomNav';
-
-export interface Transaction {
-  id: string;
-  type: 'income' | 'expense';
-  amount: number;
-  description: string;
-  category: string;
-  date: string;
-  timestamp: number;
-}
-
-export interface Budget {
-  category: string;
-  limit: number;
-  spent: number;
-}
+import { FinanceHeader } from '@/components/FinanceHeader';
+import { OverviewCards } from '@/components/OverviewCards';
+import { FinanceTabsContent } from '@/components/FinanceTabsContent';
+import { Transaction, Budget } from '@/types/finance';
 
 const Index = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([
@@ -65,7 +46,6 @@ const Index = () => {
   ]);
 
   const [showTransactionForm, setShowTransactionForm] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState('week');
   const [activeTab, setActiveTab] = useState('overview');
 
   const addTransaction = (transaction: Omit<Transaction, 'id' | 'timestamp'>) => {
@@ -112,74 +92,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pb-20 md:pb-8">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Personal Finance Tracker
-            </h1>
-            <p className="text-gray-600 mt-1">Take control of your financial future</p>
-          </div>
-          <Button 
-            onClick={() => setShowTransactionForm(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Transaction
-          </Button>
-        </div>
+        <FinanceHeader onAddTransaction={() => setShowTransactionForm(true)} />
+        
+        <OverviewCards 
+          balance={balance}
+          totalIncome={totalIncome}
+          totalExpenses={totalExpenses}
+        />
 
-        {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Balance</CardTitle>
-              <DollarSign className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                ${balance.toFixed(2)}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {balance >= 0 ? 'Positive balance' : 'Negative balance'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Income</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                ${totalIncome.toFixed(2)}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                This period
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Expenses</CardTitle>
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                ${totalExpenses.toFixed(2)}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                This period
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content with Desktop Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* Desktop Tab List - Hidden on Mobile */}
           <TabsList className="hidden md:grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
@@ -187,52 +108,15 @@ const Index = () => {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SpendingChart transactions={transactions} />
-              <CategoryChart transactions={transactions} />
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {budgets.map(budget => (
-                <BudgetCard 
-                  key={budget.category} 
-                  budget={budget}
-                  onUpdateBudget={updateBudget}
-                />
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="transactions">
-            <TransactionList transactions={transactions} />
-          </TabsContent>
-
-          <TabsContent value="budgets" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {budgets.map(budget => (
-                <BudgetCard 
-                  key={budget.category} 
-                  budget={budget}
-                  onUpdateBudget={updateBudget}
-                  detailed={true}
-                />
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SpendingChart transactions={transactions} />
-              <CategoryChart transactions={transactions} />
-            </div>
-          </TabsContent>
+          <FinanceTabsContent 
+            transactions={transactions}
+            budgets={budgets}
+            onUpdateBudget={updateBudget}
+          />
         </Tabs>
 
-        {/* Mobile Bottom Navigation */}
         <MobileBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Transaction Form Modal */}
         {showTransactionForm && (
           <TransactionForm
             onAddTransaction={addTransaction}

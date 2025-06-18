@@ -1,7 +1,6 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Transaction } from '@/pages/Index';
+import { Transaction } from '@/types/finance';
 import { PieChart as PieChartIcon } from 'lucide-react';
 
 interface CategoryChartProps {
