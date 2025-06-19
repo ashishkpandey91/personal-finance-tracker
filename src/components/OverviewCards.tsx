@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -10,7 +9,7 @@ interface OverviewCardsProps {
 
 export const OverviewCards = ({ balance, totalIncome, totalExpenses }: OverviewCardsProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">Total Balance</CardTitle>
