@@ -1,6 +1,6 @@
 
 import { Card } from '@/components/ui/card';
-import { BarChart, CreditCard, Target, TrendingUp, Newspaper } from 'lucide-react';
+import { BarChart, CreditCard, TrendingUp, Newspaper, Home } from 'lucide-react';
 
 interface MobileBottomNavProps {
   activeTab: string;
@@ -9,9 +9,8 @@ interface MobileBottomNavProps {
 
 export const MobileBottomNav = ({ activeTab, onTabChange }: MobileBottomNavProps) => {
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: BarChart },
+    { id: 'overview', label: 'Home', icon: Home },
     { id: 'transactions', label: 'Transactions', icon: CreditCard },
-    { id: 'budgets', label: 'Budgets', icon: Target },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
     { id: 'news', label: 'News', icon: Newspaper },
   ];
@@ -30,8 +29,8 @@ export const MobileBottomNav = ({ activeTab, onTabChange }: MobileBottomNavProps
                 onClick={() => onTabChange(tab.id)}
                 className={`flex flex-col items-center justify-center py-2 px-2 rounded-lg transition-all duration-200 ${
                   isActive 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'text-blue-600' 
+                    : 'text-gray-500'
                 }`}
               >
                 <Icon className={`h-5 w-5 mb-1 ${isActive ? 'text-blue-600' : 'text-gray-500'}`} />
