@@ -2,10 +2,12 @@ import express from "express";
 import { envConfig } from "./config/index.js";
 import { db } from "./db.js";
 import router from "./routes/index.js";
+import cors from "cors"; //
 
 const app = express();
 const PORT = envConfig.get("PORT");
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

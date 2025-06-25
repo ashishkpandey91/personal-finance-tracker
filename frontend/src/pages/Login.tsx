@@ -1,4 +1,4 @@
-import authService from "@/appwrite/services/Auth";
+import authService from "@/services/Auth";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -25,22 +25,14 @@ export default function Login() {
   const dispatch = useAppDispatch();
 
   const onSubmit = async () => {
-    if (!email || !password) {
-      console.log("no email password");
-      return;
-    }
-
-    setLoading(true);
     const { error, data } = await authService.login(email, password);
     if (data) {
-      authService.getCurrentUser().then(({ data }) => {
-        if (data) {
-          dispatch(login(data));
-          navigate("/");
-        }
-      });
+      const userRes = await authService.getCurrentUser();
+      if (userRes.data) {
+        dispatch(login(userRes.data));
+      }
+      navigate("/");
     }
-    setLoading(false);
 
     if (error) {
       toast({
@@ -48,13 +40,7 @@ export default function Login() {
         title: "Error",
         description: error.message,
       });
-      return;
     }
-
-    toast({
-      title: "Success ",
-      description: "Logged in successfully",
-    });
   };
 
   return (

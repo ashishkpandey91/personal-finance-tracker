@@ -1,121 +1,117 @@
-import authService from "@/appwrite/services/Auth";
-import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import authService from "@/services/Auth";
 import { useAppDispatch } from "@/store/hook";
+import { login } from "@/features/authSlice";
+import { toast } from "@/hooks/use-toast";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { login } from "@/features/authSlice";
-import Loader from "@/components/Loader";
+import { Button } from "@/components/ui/button";
 
 export default function Signup() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const onSubmit = async () => {
-    if (!email || !password) {
-      console.log("no email password");
-      return;
-    }
 
-    setLoading(true);
-    const { error, data } = await authService.singup(email, password, name);
-    if (data) {
-      dispatch(login(data));
-      navigate("/");
-    }
-    setLoading(false);
-
-    if (error) {
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !password) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Missing Fields",
+        description: "All fields are required.",
       });
       return;
     }
 
-    toast({
-      title: "Success",
-      description: "Account created",
-    });
+    setLoading(true);
+
+    const { data, error } = await authService.signup(name, email, password);
+
+    if (data) {
+      const { data: user } = await authService.getCurrentUser();
+      if (user) {
+        dispatch(login(user));
+        toast({ title: "Account created", description: "Signed up successfully!" });
+        navigate("/");
+      }
+    }
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: error.message || "Something went wrong",
+      });
+    }
+
+    setLoading(false);
   };
 
   return (
     <Card className="w-full mx-3 md:w-[450px]">
       <CardHeader>
-        <CardTitle className="text-center text-xl pt-3">
-          Sign up to create account
-        </CardTitle>
+        <CardTitle className="text-center text-xl pt-3">Sign Up</CardTitle>
         <CardDescription className="text-center text-sm">
           Already have an account?{" "}
-          <Link className="font-semibold hover:text-emerald-600" to={"/login"}>
-            Sign in
-          </Link>{" "}
+          <Link className="font-semibold" to="/login">
+            Login
+          </Link>
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4">
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="user_name">Name:</Label>
-              <Input
-                type="text"
-                id="user_name"
-                placeholder="Enter your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
+        <form className="space-y-4" onSubmit={handleSignup}>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              placeholder="Your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="user_email">Email:</Label>
-              <Input
-                id="user_email"
-                placeholder="Enter your email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              placeholder="you@example.com"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="user_password">Password:</Label>
-              <Input
-                id="user_password"
-                placeholder="Enter your password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
+
+          <CardFooter className="flex justify-center p-0 pt-4">
+            <Button className="w-full" disabled={loading} type="submit">
+              {loading ? "Creating..." : "Sign Up"}
+            </Button>
+          </CardFooter>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-center ">
-        <Button
-          className="w-full tracking-wide bg-emerald-600 hover:bg-emerald-700"
-          disabled={loading}
-          onClick={onSubmit}
-          type="submit"
-        >
-          {loading ? <Loader /> : "Sign up"}
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

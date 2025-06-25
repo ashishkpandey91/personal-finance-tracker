@@ -1,15 +1,14 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom"; // Import createBrowserRouter and RouterProvider
-import App from "./App.tsx";
-import "./index.css";
-import { Toaster } from "@/components/ui/toaster";
-import store from "./store/store.ts";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
-import AuthLayout from "./components/AuthLayout.tsx";
-import Index from "./pages/Index.tsx";
-import LoginPage from "./pages/Login.tsx";
-import SignupPage from "./pages/Signup.tsx";
+import store from "./store/store";
+import App from "./App";
+import LoginPage from "./pages/Login";
+import SignupPage from "./pages/Signup";
+import Index from "./pages/Index";
+import AuthLayout from "./components/AuthLayout";
+import "./index.css";
 
 const router = createBrowserRouter([
   {
@@ -48,7 +47,6 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <RouterProvider router={router} />
-      <Toaster />
     </Provider>
   </StrictMode>
 );

@@ -1,26 +1,19 @@
 import { useEffect, useState } from "react";
-import { authService } from "@/appwrite/services/Auth";
-import { login, logout } from "@/features/authSlice";
 import { Outlet } from "react-router-dom";
+import authService from "@/services/Auth";
+import { login, logout } from "@/features/authSlice";
 import { useAppDispatch } from "@/store/hook";
-import { CircleUser} from "lucide-react";
 
 function App() {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    authService
-      .getCurrentUser()
-      .then(({ data }) => {
-        if (data) {
-          // console.log("user data: ", data);
-          dispatch(login(data));
-        } else {
-          dispatch(logout());
-        }
-      })
-      .finally(() => setLoading(false));
+    authService.getCurrentUser().then(({ data }) => {
+      if (data) dispatch(login(data));
+      else dispatch(logout());
+      setLoading(false);
+    });
   }, []);
 
   return !loading ? (

@@ -1,26 +1,17 @@
 import { useAppSelector } from "@/store/hook";
-import { ProtectedProps } from "@/type/index";
-import { ReactElement, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
 
-function Protected({
-  children,
-  authentication = true,
-}: ProtectedProps): ReactElement {
-  const [loader, setLoader] = useState(true);
-  const navigate = useNavigate();
-  const authStatus = useAppSelector((state) => state.auth.status);
-
-  useEffect(() => {
-    if (!authentication && authStatus !== authentication) {
-      navigate("/login");
-    } else if (authentication && authStatus !== authentication) {
-      navigate("/");
-    }
-    setLoader(false);
-  }, [navigate, authStatus, authentication]);
-
-  return loader ? <h1>Loading...</h1> : <>{children}</>;
+interface Props {
+  children: ReactNode;
+  authentication: boolean;
 }
 
-export default Protected;
+export default function AuthLayout({ children, authentication }: Props) {
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+
+  if (authentication && !isAuthenticated) return <Navigate to="/login" />;
+  if (!authentication && isAuthenticated) return <Navigate to="/" />;
+
+  return <>{children}</>;
+}

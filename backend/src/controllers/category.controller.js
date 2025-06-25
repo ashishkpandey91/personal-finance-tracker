@@ -107,4 +107,3 @@ export const setCategoryBudget = async (req, res) => {
   }
 };
 
-fetch(`setup/${categoryId}`);

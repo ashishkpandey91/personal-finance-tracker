@@ -1,12 +1,12 @@
 import { db } from "../db.js";
 import bcrypt from "bcrypt";
-import { generateJwt } from "../utils/jwt.js";
+import { generateJwt, verifyJwt } from "../utils/jwt.js";
 
 export async function createUser(req, res) {
   try {
-    const { email, password, fullName } = req.body;
+    const { email, password, name } = req.body;
 
-    if (!email || !password || !fullName) {
+    if (!email || !password || !name) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -16,7 +16,7 @@ export async function createUser(req, res) {
 
     const response = await db.query(
       "INSERT INTO users (email, password, full_name) VALUES ($1, $2, $3) RETURNING *",
-      [email, hashPassword, fullName]
+      [email, hashPassword, name]
     );
 
     if (response.rowCount === 0) {
@@ -76,6 +76,40 @@ export async function loginUser(req, res) {
     });
   } catch (error) {
     console.error("Error logging in user:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+export async function getCurrentUser(req, res) {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Authorization token missing" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = verifyJwt(token);
+
+    if (!decoded) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    const userId = decoded.id;
+
+    const response = await db.query(
+      "SELECT id, email, full_name FROM users WHERE id = $1",
+      [userId]
+    );
+
+    if (response.rowCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const user = response.rows[0];
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error getting current user:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
