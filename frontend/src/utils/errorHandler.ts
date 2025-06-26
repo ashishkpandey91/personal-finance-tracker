@@ -1,12 +1,9 @@
-import { AppwriteException } from "appwrite";
+// utils/handleError.ts
+export function handleError(error: any) {
+  const message =
+    error?.response?.data?.error || // backend-sent error
+    error?.message ||               // network/axios error
+    "An unexpected error occurred";
 
-export function handleError(error: unknown) {
-  let message: string = "Something went wrong..";
-
-  if (error instanceof AppwriteException || error instanceof Error) {
-    message = error.message;
-    console.log("Error From:", error);
-  }
-
-  return { data: null, error: { message } };
+  return { error: message, data: null };
 }

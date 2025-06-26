@@ -46,25 +46,27 @@ export async function loginUser(req, res) {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    console.log("Login attempt for email:", email);
+    console.log(`[LOGIN_ATTEMPT] Email: ${email}`);
 
-    const response = await db.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
+    const response = await db.query("SELECT * FROM users WHERE email = $1", [email]);
 
     if (response.rowCount === 0) {
+      console.warn(`[LOGIN_FAILED] Email not found: ${email}`);
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const user = response.rows[0];
-
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid password" });
+      console.warn(`[LOGIN_FAILED] Invalid password for email: ${email}`);
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    res.status(200).json({
+    const token = generateJwt({ id: user.id, email: user.email });
+
+    console.info(`[LOGIN_SUCCESS] User ID: ${user.id}`);
+    return res.status(200).json({
       message: "User logged in successfully",
       user: {
         id: user.id,
@@ -72,13 +74,15 @@ export async function loginUser(req, res) {
         fullName: user.full_name,
         createdAt: user.created_at,
       },
-      token: generateJwt({ id: user.id, email: user.email }),
+      token,
     });
+
   } catch (error) {
-    console.error("Error logging in user:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("[LOGIN_ERROR] Internal error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
+
 export async function getCurrentUser(req, res) {
   try {
     const authHeader = req.headers.authorization;

@@ -1,7 +1,10 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, LoginSchemaType } from "@/schema/authSchema";
 import authService from "@/services/Auth";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,35 +15,45 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useAppDispatch } from "@/store/hook";
 import { login } from "@/features/authSlice";
 
 export default function Login() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const onSubmit = async () => {
-    const { error, data } = await authService.login(email, password);
-    if (data) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginSchemaType>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (values: LoginSchemaType) => {
+    setLoading(true);
+
+    const result = await authService.login(values.email, values.password);
+
+    if (result.data) {
       const userRes = await authService.getCurrentUser();
       if (userRes.data) {
         dispatch(login(userRes.data));
+        toast.success("Login Successful", {
+          description: `Welcome back`,
+        });
       }
       navigate("/");
-    }
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
+    } else if ("error" in result && result.error) {
+      toast.error("Login Failed", {
+        description: result.error,
       });
     }
+
+    setLoading(false);
   };
 
   return (
@@ -51,48 +64,51 @@ export default function Login() {
           Don't have an account?{" "}
           <Link className="font-semibold" to={"/signup"}>
             Sign up
-          </Link>{" "}
+          </Link>
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4">
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="user_email">Email:</Label>
-              <Input
-                id="user_email"
-                placeholder="Enter your email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              placeholder="Enter your email"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            )}
           </div>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="user_password">Password:</Label>
-              <Input
-                id="user_password"
-                placeholder="Enter your password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password.message}</p>
+            )}
           </div>
+
+          <CardFooter className="flex justify-center p-0 pt-2">
+            <Button
+              className="w-full tracking-wide"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+          </CardFooter>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-center ">
-        <Button
-          className="w-full tracking-wide"
-          disabled={loading}
-          onClick={onSubmit}
-          type="submit"
-          // loading={loading}
-        >
-          Sing In
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

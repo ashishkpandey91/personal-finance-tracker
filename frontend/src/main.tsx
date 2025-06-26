@@ -9,6 +9,7 @@ import SignupPage from "./pages/Signup";
 import Index from "./pages/Index";
 import AuthLayout from "./components/AuthLayout";
 import "./index.css";
+import { Toaster } from "@/components/ui/sonner"
 
 const router = createBrowserRouter([
   {
@@ -47,6 +48,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <RouterProvider router={router} />
+      <Toaster  position="top-center" />
     </Provider>
   </StrictMode>
 );
