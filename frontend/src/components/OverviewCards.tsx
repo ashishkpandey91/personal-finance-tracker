@@ -17,7 +17,7 @@ export const OverviewCards = ({ balance, totalIncome, totalExpenses }: OverviewC
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            ${balance.toFixed(2)}
+            ${balance}
           </div>
           <p className="text-xs text-gray-500 mt-1">
             {balance >= 0 ? 'Positive balance' : 'Negative balance'}
@@ -32,7 +32,7 @@ export const OverviewCards = ({ balance, totalIncome, totalExpenses }: OverviewC
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
-            ${totalIncome.toFixed(2)}
+            ${totalIncome}
           </div>
           <p className="text-xs text-gray-500 mt-1">
             This period
@@ -47,7 +47,7 @@ export const OverviewCards = ({ balance, totalIncome, totalExpenses }: OverviewC
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-600">
-            ${totalExpenses.toFixed(2)}
+            ${totalExpenses}
           </div>
           <p className="text-xs text-gray-500 mt-1">
             This period

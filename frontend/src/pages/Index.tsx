@@ -7,49 +7,40 @@ import { OverviewCards } from "@/components/OverviewCards";
 import { FinanceTabsContent } from "@/components/FinanceTabsContent";
 import { Transaction, Budget } from "@/types/finance";
 import { CircleUser, LogOut } from "lucide-react";
+import { financeService } from "@/services/financeService";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Index = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: "1",
-      type: "expense",
-      amount: 45.5,
-      description: "Grocery shopping",
-      category: "Food",
-      date: "2024-01-15",
-      timestamp: Date.now() - 86400000,
-    },
-    {
-      id: "2",
-      type: "income",
-      amount: 2500.0,
-      description: "Salary",
-      category: "Work",
-      date: "2024-01-15",
-      timestamp: Date.now() - 172800000,
-    },
-    {
-      id: "3",
-      type: "expense",
-      amount: 25.0,
-      description: "Coffee subscription",
-      category: "Food",
-      date: "2024-01-14",
-      timestamp: Date.now() - 259200000,
-    },
-  ]);
-
-  const [budgets, setBudgets] = useState<Budget[]>([
-    { category: "Food", limit: 500, spent: 70.5 },
-    { category: "Transportation", limit: 200, spent: 45.0 },
-    { category: "Entertainment", limit: 150, spent: 25.0 },
-  ]);
-
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [fetchedTransactions, fetchedBudgets] = await Promise.all([
+          financeService.getTransactions(),
+          financeService.getBudgets(),
+        ]);
+        setTransactions(fetchedTransactions);
+        setBudgets(fetchedBudgets);
+      } catch (error) {
+        console.error("Error fetching finance data:", error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -69,47 +60,52 @@ const Index = () => {
     window.location.href = "/login";
   };
 
-  const addTransaction = (
+  const addTransaction = async (
     transaction: Omit<Transaction, "id" | "timestamp">
   ) => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-    };
-    setTransactions((prev) => [newTransaction, ...prev]);
+    try {
+      const newTransaction = await financeService.addTransaction(transaction);
+      setTransactions((prev) => [newTransaction, ...prev]);
 
-    if (transaction.type === "expense") {
-      setBudgets((prev) =>
-        prev.map((budget) =>
-          budget.category === transaction.category
-            ? { ...budget, spent: budget.spent + transaction.amount }
-            : budget
-        )
-      );
+      if (transaction.type === "expense") {
+        setBudgets((prev) =>
+          prev.map((budget) =>
+            budget.category === transaction.category
+              ? { ...budget, spent: budget.spent + transaction.amount }
+              : budget
+          )
+        );
+      }
+
+      setShowTransactionForm(false);
+    } catch (error) {
+      console.error("Failed to add transaction:", error);
     }
-
-    setShowTransactionForm(false);
   };
 
-  const updateBudget = (category: string, limit: number) => {
-    setBudgets((prev) => {
-      const existing = prev.find((b) => b.category === category);
-      if (existing) {
-        return prev.map((b) => (b.category === category ? { ...b, limit } : b));
-      } else {
-        return [...prev, { category, limit, spent: 0 }];
-      }
-    });
+  const updateBudget = async (category: string, limit: number) => {
+    try {
+      const updated = await financeService.updateBudget(category, limit);
+      setBudgets((prev) => {
+        const exists = prev.find((b) => b.category === category);
+        if (exists) {
+          return prev.map((b) => (b.category === category ? updated : b));
+        } else {
+          return [...prev, updated];
+        }
+      });
+    } catch (error) {
+      console.error("Failed to update budget:", error);
+    }
   };
 
   const totalIncome = transactions
     .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const totalExpenses = transactions
     .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const balance = totalIncome - totalExpenses;
 
@@ -184,6 +180,21 @@ const Index = () => {
               onClose={() => setShowTransactionForm(false)}
             />
           )}
+          <Sheet>
+            <SheetTrigger>Open</SheetTrigger>
+            <SheetContent className="w-[400px] sm:w-[540px]">
+              <SheetHeader>
+                <SheetTitle>Add Transaction</SheetTitle>
+                <SheetDescription>
+                  Record your income or expense
+                </SheetDescription>
+              </SheetHeader>
+              <TransactionForm
+                onAddTransaction={addTransaction}
+                onClose={() => setShowTransactionForm(false)}
+              />
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </>

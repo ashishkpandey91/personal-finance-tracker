@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import authService from "@/services/Auth";
+import authService from "@/services/auth";
 import { useAppDispatch } from "@/store/hook";
 import { login } from "@/features/authSlice";
 import { toast } from "@/hooks/use-toast";

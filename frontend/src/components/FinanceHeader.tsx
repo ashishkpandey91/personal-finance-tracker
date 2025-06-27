@@ -1,6 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { SheetTrigger } from './ui/sheet';
 
 interface FinanceHeaderProps {
   onAddTransaction: () => void;
