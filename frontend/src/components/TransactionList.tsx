@@ -157,7 +157,7 @@ export const TransactionList = ({ transactions }: TransactionListProps) => {
                   }`}
                 >
                   {transaction.type === "income" ? "+" : "-"}$
-                  {transaction.amount.toFixed(2)}
+                  {Number(transaction.amount).toFixed(2)}
                 </div>
               </div>
             ))

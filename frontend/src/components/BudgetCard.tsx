@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,7 +91,7 @@ export const BudgetCard = ({ budget, onUpdateBudget, detailed = false }: BudgetC
           <div className="flex justify-between items-center text-sm">
             <span className="text-gray-600">Spent</span>
             <span className={`font-bold ${isOverBudget ? 'text-red-600' : 'text-gray-800'}`}>
-              ${budget.spent.toFixed(2)}
+              &#8377;{budget.spent.toFixed(2)}
             </span>
           </div>
           
@@ -99,7 +99,7 @@ export const BudgetCard = ({ budget, onUpdateBudget, detailed = false }: BudgetC
             <span className="text-gray-600">Budget</span>
             {isEditing ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">$</span>
+                <span className="text-sm text-gray-600">&#8377;</span>
                 <Input
                   type="number"
                   value={newLimit}
@@ -110,7 +110,7 @@ export const BudgetCard = ({ budget, onUpdateBudget, detailed = false }: BudgetC
                 />
               </div>
             ) : (
-              <span className="font-bold text-gray-800">${budget.limit.toFixed(2)}</span>
+              <span className="font-bold text-gray-800">&#8377;{budget.limit.toFixed(2)}</span>
             )}
           </div>
           
@@ -124,7 +124,7 @@ export const BudgetCard = ({ budget, onUpdateBudget, detailed = false }: BudgetC
             />
             <div className="flex justify-between text-xs text-gray-500">
               <span>{percentage.toFixed(0)}% used</span>
-              <span>${(budget.limit - budget.spent).toFixed(2)} remaining</span>
+              <span>&#8377;{(budget.limit - budget.spent).toFixed(2)} remaining</span>
             </div>
           </div>
 
@@ -133,12 +133,12 @@ export const BudgetCard = ({ budget, onUpdateBudget, detailed = false }: BudgetC
               <div className="text-xs text-gray-500 space-y-1">
                 <div className="flex justify-between">
                   <span>Daily average:</span>
-                  <span>${(budget.spent / 30).toFixed(2)}</span>
+                  <span>&#8377;{(budget.spent / 30).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Projected month:</span>
                   <span className={budget.spent * 30 > budget.limit ? 'text-red-600' : 'text-green-600'}>
-                    ${(budget.spent * 30).toFixed(2)}
+                    &#8377;{(budget.spent * 30).toFixed(2)}
                   </span>
                 </div>
               </div>

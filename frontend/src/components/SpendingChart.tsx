@@ -18,15 +18,15 @@ export const SpendingChart = ({ transactions }: SpendingChartProps) => {
     const existing = acc.find(item => item.date === date);
     if (existing) {
       if (transaction.type === 'income') {
-        existing.income += transaction.amount;
+        existing.income += Number(transaction.amount);
       } else {
-        existing.expense += transaction.amount;
+        existing.expense += Number(transaction.amount);
       }
     } else {
       acc.push({
         date,
-        income: transaction.type === 'income' ? transaction.amount : 0,
-        expense: transaction.type === 'expense' ? transaction.amount : 0
+        income: transaction.type === 'income' ? Number(transaction.amount) : 0,
+        expense: transaction.type === 'expense' ? Number(transaction.amount) : 0
       });
     }
     
@@ -63,7 +63,7 @@ export const SpendingChart = ({ transactions }: SpendingChartProps) => {
                 tickFormatter={(value) => `$${value}`}
               />
               <Tooltip 
-                formatter={(value: number, name: string) => [`$${value.toFixed(2)}`, name === 'income' ? 'Income' : 'Expense']}
+                formatter={(value: number, name: string) => [`$${Number(value).toFixed(2)}`, name === 'income' ? 'Income' : 'Expense']}
                 labelStyle={{ color: '#333' }}
                 contentStyle={{ 
                   backgroundColor: 'white',

@@ -14,7 +14,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 
 const Index = () => {
@@ -166,23 +165,22 @@ const Index = () => {
             </TabsList>
 
             <FinanceTabsContent
+              onAddTransaction={() => setShowTransactionForm(true)}
+              totalIncome={totalIncome}
+              totalExpenses={totalExpenses}
               transactions={transactions}
+              balance={balance}
               budgets={budgets}
               onUpdateBudget={updateBudget}
             />
           </Tabs>
 
           <MobileBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-
-          {showTransactionForm && (
-            <TransactionForm
-              onAddTransaction={addTransaction}
-              onClose={() => setShowTransactionForm(false)}
-            />
-          )}
-          <Sheet>
-            <SheetTrigger>Open</SheetTrigger>
-            <SheetContent className="w-[400px] sm:w-[540px]">
+          <Sheet
+            open={showTransactionForm}
+            onOpenChange={setShowTransactionForm}
+          >
+            <SheetContent className="w-[98vw] sm:w-[540px] max-w-full">
               <SheetHeader>
                 <SheetTitle>Add Transaction</SheetTitle>
                 <SheetDescription>

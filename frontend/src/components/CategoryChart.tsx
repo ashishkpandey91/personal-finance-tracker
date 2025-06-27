@@ -16,11 +16,11 @@ export const CategoryChart = ({ transactions }: CategoryChartProps) => {
     .reduce((acc, transaction) => {
       const existing = acc.find(item => item.name === transaction.category);
       if (existing) {
-        existing.value += transaction.amount;
+        existing.value += Number(transaction.amount);
       } else {
         acc.push({
           name: transaction.category,
-          value: transaction.amount
+          value: Number(transaction.amount)
         });
       }
       return acc;
