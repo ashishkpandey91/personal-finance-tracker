@@ -40,13 +40,11 @@ export const getUserCategories = async (req, res) => {
     const userId = req.user.id;
 
     const result = await db.query(
-      "SELECT id, category_name FROM expense_categories WHERE user_id = $1",
+      "SELECT id, category_name AS name FROM expense_categories WHERE user_id = $1 ORDER BY name",
       [userId]
     );
 
-    res.status(200).json({
-      categories: result.rows,
-    });
+    res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error fetching user categories:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -106,4 +104,3 @@ export const setCategoryBudget = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-

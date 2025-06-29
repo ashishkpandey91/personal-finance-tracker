@@ -1,8 +1,9 @@
 // src/features/authSlice.ts
+import { User } from "@/types/user";
 import { createSlice } from "@reduxjs/toolkit";
 
 interface AuthState {
-  user: any;
+  user: { user: User };
   isAuthenticated: boolean;
 }
 

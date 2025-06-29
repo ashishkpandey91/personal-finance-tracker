@@ -30,7 +30,7 @@ export const TransactionList = ({ transactions }: TransactionListProps) => {
 
   const filteredTransactions = transactions.filter((transaction) => {
     const matchesSearch =
-      transaction.description
+      String(transaction.description)
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       transaction.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -135,10 +135,10 @@ export const TransactionList = ({ transactions }: TransactionListProps) => {
 
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="font-medium text-gray-800">
+                      <p className="font-medium text-sm text-gray-800 capitalize">
                         {transaction.description}
                       </p>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs capitalize">
                         {transaction.category}
                       </Badge>
                     </div>

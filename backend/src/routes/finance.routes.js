@@ -3,9 +3,8 @@ import {
   getTransactions,
   addTransaction,
   getBudgets,
-  updateBudget
+  updateBudget,
 } from "../controllers/finance.controller.js";
-
 
 const financeRouter = express.Router();
 

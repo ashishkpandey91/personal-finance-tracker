@@ -10,20 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar, Tag, FileText, IndianRupee } from "lucide-react";
-import { Transaction } from "@/types/finance";
-import axios from "axios"; // assuming you use axios
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { addNewCategory, getUserCategories } from "@/features/categorySlice";
+import { addNewTransaction } from "@/features/transactionSlice";
 
 interface TransactionFormProps {
-  onAddTransaction: (
-    transaction: Omit<Transaction, "id" | "timestamp">
-  ) => void;
   onClose: () => void;
 }
 
-export const TransactionForm = ({
-  onAddTransaction,
-  onClose,
-}: TransactionFormProps) => {
+export const TransactionForm = ({ onClose }: TransactionFormProps) => {
+  const categoryState = useAppSelector((state) => state.category);
+  const dispatch = useAppDispatch();
+
   const [formData, setFormData] = useState({
     type: "expense" as "income" | "expense",
     amount: "",
@@ -32,54 +30,54 @@ export const TransactionForm = ({
     date: new Date().toISOString().split("T")[0],
   });
 
-  const [categories, setCategories] = useState<string[]>([]);
   const [showAddNew, setShowAddNew] = useState(false);
   const [newCategory, setNewCategory] = useState("");
 
   // Fetch categories from your API
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await axios.get("/api/categories");
-        setCategories(res.data); // assuming array of strings
-      } catch (error) {
-        console.error("Failed to fetch categories", error);
-      }
-    };
-
-    fetchCategories();
+    if (categoryState.loading !== "succeeded") {
+      dispatch(getUserCategories());
+    }
   }, []);
 
   // Handle adding a new category
   const handleAddNewCategory = async () => {
     if (!newCategory.trim()) return;
 
-    try {
-      const res = await axios.post("/api/categories", { name: newCategory });
-      const added = res.data.name; // assume response returns new category
-
-      setCategories((prev) => [...prev, added]);
-      setFormData((prev) => ({ ...prev, category: added }));
-      setNewCategory("");
-      setShowAddNew(false);
-    } catch (error) {
-      console.error("Error adding category", error);
-    }
+    // TODO: check duplication category
+    await dispatch(addNewCategory(newCategory));
+    setShowAddNew(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.amount || !formData.description || !formData.category) return;
-
-    onAddTransaction({
+    if (
+      !formData.amount ||
+      !formData.description ||
+      !formData.category ||
+      !formData.date
+    )
+      return;
+    const transitions = {
       type: formData.type,
       amount: parseFloat(formData.amount),
       description: formData.description,
       category: formData.category,
       date: formData.date,
-    });
+    };
+
+    dispatch(addNewTransaction(transitions));
+    onClose();
   };
+  // First: sort so "Other" goes to second last
+  const sortedCategories = [...categoryState.entities]
+    .filter(Boolean)
+    .sort((a, b) => {
+      if (a.name.toLowerCase() === "others") return 1;
+      if (b.name.toLowerCase() === "others") return -1;
+      return 0;
+    });
 
   return (
     <div>
@@ -161,16 +159,26 @@ export const TransactionForm = ({
               }}
             >
               <SelectTrigger className="mt-1">
-                <Tag className="h-4 w-4 mr-2 text-gray-400" />
-                <SelectValue placeholder="Select a category" />
+                <Tag className="h-4 w-4 mr-2 text-gray-400 capitalize" />
+                <SelectValue placeholder="Select a category">
+                  {categoryState.entities
+                    .find((cat) => String(cat.id) === formData.category)
+                    ?.name?.replace(/\b\w/g, (char) => char.toUpperCase())}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {/* {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                {sortedCategories.map((category) => (
+                  <SelectItem
+                    className="capitalize"
+                    key={category.id}
+                    value={String(category.id)}
+                  >
+                    {category.name}
                   </SelectItem>
-                ))} */}
-                <SelectItem value="add_new">
+                ))}
+
+                {/* Manually add "Add new category" */}
+                <SelectItem value="add_new" className="capitalize">
                   Add new category
                 </SelectItem>
               </SelectContent>
@@ -211,7 +219,12 @@ export const TransactionForm = ({
 
           {/* Submit / Cancel */}
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+            >
               Cancel
             </Button>
             <Button

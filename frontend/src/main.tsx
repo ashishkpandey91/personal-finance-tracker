@@ -45,10 +45,10 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  // <StrictMode>
     <Provider store={store}>
       <RouterProvider router={router} />
       <Toaster  position="top-center" />
     </Provider>
-  </StrictMode>
+  // </StrictMode>
 );

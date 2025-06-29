@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/v1/api", router);
+app.use("/api/v1", router);
 
 async function startServer() {
   try {

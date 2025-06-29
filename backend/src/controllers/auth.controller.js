@@ -1,6 +1,7 @@
 import { db } from "../db.js";
 import bcrypt from "bcrypt";
 import { generateJwt, verifyJwt } from "../utils/jwt.js";
+import { createDefaultCategories } from "../utils/createDefaultCategories.js";
 
 export async function createUser(req, res) {
   try {
@@ -25,6 +26,8 @@ export async function createUser(req, res) {
 
     const user = response.rows[0];
 
+    await createDefaultCategories(user.id);
+
     const token = generateJwt({ id: user.id, email: user.email });
 
     res.status(201).send({
@@ -48,7 +51,9 @@ export async function loginUser(req, res) {
 
     console.log(`[LOGIN_ATTEMPT] Email: ${email}`);
 
-    const response = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+    const response = await db.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
 
     if (response.rowCount === 0) {
       console.warn(`[LOGIN_FAILED] Email not found: ${email}`);
@@ -76,7 +81,6 @@ export async function loginUser(req, res) {
       },
       token,
     });
-
   } catch (error) {
     console.error("[LOGIN_ERROR] Internal error:", error);
     return res.status(500).json({ error: "Internal server error" });

@@ -5,6 +5,7 @@ const _CONF = {
   APPWRITE_COLLECTION_ID: import.meta.env.VITE_APPWRITE_COLLECTION_ID,
   APPWRITE_BUCKET_ID: import.meta.env.VITE_APPWRITE_BUCKET_ID,
   TINYMCE_API_KEY: import.meta.env.VITE_TINYMCE_API_KEY,
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
 };
 
 // export default conf;
@@ -14,7 +15,7 @@ const CONF = {
     const value = _CONF[key];
 
     if (!value) {
-      console.error(`Enviroment varialbe ${key} not found`);
+      console.error(`Environment variable ${key} not found`);
     }
 
     return value;

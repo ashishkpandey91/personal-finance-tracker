@@ -15,9 +15,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { fetchTransactions } from "@/features/transactionSlice";
 
 const Index = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const transactions = useAppSelector((state) => state.transaction);
+  const user = useAppSelector((state) => state.auth.user);
+  const dispatch = useAppDispatch();
+
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -27,12 +32,9 @@ const Index = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [fetchedTransactions, fetchedBudgets] = await Promise.all([
-          financeService.getTransactions(),
-          financeService.getBudgets(),
-        ]);
-        setTransactions(fetchedTransactions);
-        setBudgets(fetchedBudgets);
+        if (transactions.loading !== "succeeded") {
+          await dispatch(fetchTransactions());
+        }
       } catch (error) {
         console.error("Error fetching finance data:", error);
       }
@@ -45,6 +47,7 @@ const Index = () => {
     function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         !(dropdownRef.current as any).contains(event.target)
       ) {
         setDropdownOpen(false);
@@ -62,9 +65,10 @@ const Index = () => {
   const addTransaction = async (
     transaction: Omit<Transaction, "id" | "timestamp">
   ) => {
+    return;
     try {
       const newTransaction = await financeService.addTransaction(transaction);
-      setTransactions((prev) => [newTransaction, ...prev]);
+      // setTransactions((prev) => [newTransaction, ...prev]);
 
       if (transaction.type === "expense") {
         setBudgets((prev) =>
@@ -98,11 +102,11 @@ const Index = () => {
     }
   };
 
-  const totalIncome = transactions
+  const totalIncome = transactions.entities
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const totalExpenses = transactions
+  const totalExpenses = transactions.entities
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
@@ -116,7 +120,7 @@ const Index = () => {
             onClick={() => setDropdownOpen((prev) => !prev)}
             className="flex items-center space-x-2 cursor-pointer"
           >
-            <p className="font-semibold">Ashish Kumar Pandey</p>
+            <p className="font-semibold">{user.user.full_name}</p>
             <div className="rounded-full w-8 h-8 flex items-center justify-center">
               <CircleUser />
             </div>
@@ -168,7 +172,7 @@ const Index = () => {
               onAddTransaction={() => setShowTransactionForm(true)}
               totalIncome={totalIncome}
               totalExpenses={totalExpenses}
-              transactions={transactions}
+              transactions={transactions.entities}
               balance={balance}
               budgets={budgets}
               onUpdateBudget={updateBudget}
@@ -187,10 +191,7 @@ const Index = () => {
                   Record your income or expense
                 </SheetDescription>
               </SheetHeader>
-              <TransactionForm
-                onAddTransaction={addTransaction}
-                onClose={() => setShowTransactionForm(false)}
-              />
+              <TransactionForm onClose={() => setShowTransactionForm(false)} />
             </SheetContent>
           </Sheet>
         </div>

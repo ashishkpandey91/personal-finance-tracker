@@ -1,7 +1,8 @@
+import CONF from "@/conf";
 import { handleError } from "@/utils/errorHandler";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3001/v1/api/auth";
+const BASE_URL = `${CONF.get("API_BASE_URL")}/auth`;
 
 const authService = {
   login: async (email: string, password: string) => {
@@ -17,7 +18,7 @@ const authService = {
       );
       localStorage.setItem("token", response.data.token);
       return { data: response.data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return handleError(error);
     }
   },
@@ -35,7 +36,7 @@ const authService = {
       );
       localStorage.setItem("token", response.data.token);
       return { data: response.data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return handleError(error);
     }
   },
@@ -50,7 +51,7 @@ const authService = {
         },
       });
       return { data: response.data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return handleError(error);
     }
   },
