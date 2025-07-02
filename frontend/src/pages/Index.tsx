@@ -184,7 +184,7 @@ const Index = () => {
             open={showTransactionForm}
             onOpenChange={setShowTransactionForm}
           >
-            <SheetContent className="w-[98vw] sm:w-[540px] max-w-full">
+            <SheetContent className="w-[98vw] sm:w-[540px] max-w-full overflow-y-scroll custom-scrollbar">
               <SheetHeader>
                 <SheetTitle>Add Transaction</SheetTitle>
                 <SheetDescription>

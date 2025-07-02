@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { transactionSchema } from "@/schema/schemas";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,9 @@ import { Calendar, Tag, FileText, IndianRupee } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { addNewCategory, getUserCategories } from "@/features/categorySlice";
 import { addNewTransaction } from "@/features/transactionSlice";
+
+// Zod schema for validation
+
 
 interface TransactionFormProps {
   onClose: () => void;
@@ -30,21 +34,19 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
     date: new Date().toISOString().split("T")[0],
   });
 
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
   const [showAddNew, setShowAddNew] = useState(false);
   const [newCategory, setNewCategory] = useState("");
 
-  // Fetch categories from your API
   useEffect(() => {
     if (categoryState.loading !== "succeeded") {
       dispatch(getUserCategories());
     }
   }, []);
 
-  // Handle adding a new category
   const handleAddNewCategory = async () => {
     if (!newCategory.trim()) return;
 
-    // TODO: check duplication category
     await dispatch(addNewCategory(newCategory));
     setShowAddNew(false);
   };
@@ -52,25 +54,29 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !formData.amount ||
-      !formData.description ||
-      !formData.category ||
-      !formData.date
-    )
+    const result = transactionSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof typeof formData, string>> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as keyof typeof formData] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
       return;
+    }
+
+    setErrors({});
+
     const transitions = {
-      type: formData.type,
-      amount: parseFloat(formData.amount),
-      description: formData.description,
-      category: formData.category,
-      date: formData.date,
+      ...result.data,
+      amount: parseFloat(result.data.amount),
     };
 
     dispatch(addNewTransaction(transitions));
     onClose();
   };
-  // First: sort so "Other" goes to second last
+
   const sortedCategories = [...categoryState.entities]
     .filter(Boolean)
     .sort((a, b) => {
@@ -83,7 +89,7 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
     <div>
       <form onSubmit={handleSubmit} className="w-full">
         <div className="flex flex-col gap-4 mt-4">
-          {/* Type Selection */}
+          {/* Type */}
           <div>
             <Label htmlFor="type">Type</Label>
             <Select
@@ -102,7 +108,7 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
             </Select>
           </div>
 
-          {/* Amount Input */}
+          {/* Amount */}
           <div>
             <Label htmlFor="amount">Amount</Label>
             <div className="relative mt-1">
@@ -117,12 +123,12 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
                   setFormData((prev) => ({ ...prev, amount: e.target.value }))
                 }
                 className="pl-10"
-                required
               />
             </div>
+            {errors.amount && <p className="text-sm text-red-500">{errors.amount}</p>}
           </div>
 
-          {/* Description Input */}
+          {/* Description */}
           <div>
             <Label htmlFor="description">Description</Label>
             <div className="relative mt-1">
@@ -132,18 +138,15 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
                 placeholder="What was this for?"
                 value={formData.description}
                 onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
+                  setFormData((prev) => ({ ...prev, description: e.target.value }))
                 }
                 className="pl-10"
-                required
               />
             </div>
+            {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
           </div>
 
-          {/* Category Selection */}
+          {/* Category */}
           <div>
             <Label htmlFor="category">Category</Label>
             <Select
@@ -168,24 +171,19 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
               </SelectTrigger>
               <SelectContent>
                 {sortedCategories.map((category) => (
-                  <SelectItem
-                    className="capitalize"
-                    key={category.id}
-                    value={String(category.id)}
-                  >
+                  <SelectItem className="capitalize" key={category.id} value={String(category.id)}>
                     {category.name}
                   </SelectItem>
                 ))}
-
-                {/* Manually add "Add new category" */}
                 <SelectItem value="add_new" className="capitalize">
                   Add new category
                 </SelectItem>
               </SelectContent>
             </Select>
+            {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
           </div>
 
-          {/* Add New Category Field */}
+          {/* New Category Input */}
           {showAddNew && (
             <div className="flex gap-2 items-end">
               <Input
@@ -199,7 +197,7 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
             </div>
           )}
 
-          {/* Date Picker */}
+          {/* Date */}
           <div>
             <Label htmlFor="date">Date</Label>
             <div className="relative mt-1">
@@ -212,12 +210,12 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
                   setFormData((prev) => ({ ...prev, date: e.target.value }))
                 }
                 className="pl-10"
-                required
               />
             </div>
+            {errors.date && <p className="text-sm text-red-500">{errors.date}</p>}
           </div>
 
-          {/* Submit / Cancel */}
+          {/* Buttons */}
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
