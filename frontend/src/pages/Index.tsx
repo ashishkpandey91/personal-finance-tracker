@@ -1,13 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TransactionForm } from "@/components/TransactionForm";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { FinanceHeader } from "@/components/FinanceHeader";
 import { OverviewCards } from "@/components/OverviewCards";
 import { FinanceTabsContent } from "@/components/FinanceTabsContent";
-import { Transaction, Budget } from "@/types/finance";
-import { CircleUser, LogOut } from "lucide-react";
-import { financeService } from "@/services/financeService";
 import {
   Sheet,
   SheetContent,
@@ -17,143 +14,52 @@ import {
 } from "@/components/ui/sheet";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
 import { fetchTransactions } from "@/features/transactionSlice";
+import Header from "@/components/Header";
+import { getUserCategories } from "@/features/categorySlice";
+import { getBudgets } from "@/features/budgetSlice";
 
 const Index = () => {
   const transactions = useAppSelector((state) => state.transaction);
-  const user = useAppSelector((state) => state.auth.user);
+  const categoryState = useAppSelector((state) => state.category);
+  const budgetState = useAppSelector((state) => state.budget);
   const dispatch = useAppDispatch();
 
-  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        if (transactions.loading !== "succeeded") {
-          await dispatch(fetchTransactions());
-        }
-      } catch (error) {
-        console.error("Error fetching finance data:", error);
-      }
-    }
+    // if (transactions.loading !== "succeeded") {
+    //   dispatch(fetchTransactions());
+    // }
 
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        !(dropdownRef.current as any).contains(event.target)
-      ) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-  };
-
-  const addTransaction = async (
-    transaction: Omit<Transaction, "id" | "timestamp">
-  ) => {
-    return;
-    try {
-      const newTransaction = await financeService.addTransaction(transaction);
-      // setTransactions((prev) => [newTransaction, ...prev]);
-
-      if (transaction.type === "expense") {
-        setBudgets((prev) =>
-          prev.map((budget) =>
-            budget.category === transaction.category
-              ? { ...budget, spent: budget.spent + transaction.amount }
-              : budget
-          )
-        );
-      }
-
-      setShowTransactionForm(false);
-    } catch (error) {
-      console.error("Failed to add transaction:", error);
-    }
-  };
-
-  const updateBudget = async (category: string, limit: number) => {
-    try {
-      const updated = await financeService.updateBudget(category, limit);
-      setBudgets((prev) => {
-        const exists = prev.find((b) => b.category === category);
-        if (exists) {
-          return prev.map((b) => (b.category === category ? updated : b));
-        } else {
-          return [...prev, updated];
-        }
-      });
-    } catch (error) {
-      console.error("Failed to update budget:", error);
-    }
-  };
-
-  const totalIncome = transactions.entities
-    .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  const totalExpenses = transactions.entities
-    .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  const balance = totalIncome - totalExpenses;
+    // if (categoryState.loading !== "succeeded") {
+    //   dispatch(getUserCategories());
+    // }
+    // if (budgetState.loading !== "succeeded") {
+    //   dispatch(getBudgets());
+    // }
+    dispatch(getBudgets());
+    dispatch(getUserCategories());
+    dispatch(fetchTransactions());
+  }, [
+    // dispatch,
+    // transactions.loading,
+    // categoryState.loading,
+    // budgetState.loading,
+  ]);
 
   return (
     <>
-      <header className="w-full relative z-50">
-        <div className="flex items-center justify-end h-full px-4 md:px-10 py-2 bg-gradient-to-br from-blue-100 via-purple-100 to-blue-100 relative">
-          <div
-            onClick={() => setDropdownOpen((prev) => !prev)}
-            className="flex items-center space-x-2 cursor-pointer"
-          >
-            <p className="font-semibold">{user.user.full_name}</p>
-            <div className="rounded-full w-8 h-8 flex items-center justify-center">
-              <CircleUser />
-            </div>
-          </div>
-
-          {dropdownOpen && (
-            <div
-              ref={dropdownRef}
-              className="absolute top-full right-4 mt-2 w-40 bg-white rounded-md shadow-lg border z-50"
-            >
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm text-left"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+      <Header />
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 pb-20 md:pb-8 w-full">
         <div className="container mx-auto px-3 md:px-4 py-8 pt-0 md:pt-8 max-w-7xl">
+          {/* this section show in only desktop */}
           <div className="hidden md:block">
             <FinanceHeader
               onAddTransaction={() => setShowTransactionForm(true)}
             />
-            <OverviewCards
-              balance={balance}
-              totalIncome={totalIncome}
-              totalExpenses={totalExpenses}
-            />
+            <OverviewCards />
           </div>
 
           <Tabs
@@ -170,12 +76,7 @@ const Index = () => {
 
             <FinanceTabsContent
               onAddTransaction={() => setShowTransactionForm(true)}
-              totalIncome={totalIncome}
-              totalExpenses={totalExpenses}
               transactions={transactions.entities}
-              balance={balance}
-              budgets={budgets}
-              onUpdateBudget={updateBudget}
             />
           </Tabs>
 

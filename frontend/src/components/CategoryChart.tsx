@@ -63,7 +63,7 @@ export const CategoryChart = ({ transactions }: CategoryChartProps) => {
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value: number) => [`$${value.toFixed(2)}`, 'Amount']}
+                  formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Amount']}
                   contentStyle={{ 
                     backgroundColor: 'white',
                     border: '1px solid #e5e7eb',

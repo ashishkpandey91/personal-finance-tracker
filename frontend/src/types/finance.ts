@@ -1,3 +1,5 @@
+import { number } from "zod";
+
 export type Transaction = {
   id: number;
   type: "income" | "expense";
@@ -10,4 +12,20 @@ export type Transaction = {
 export type Category = {
   id: string;
   name: string;
+};
+
+export type newBudget = {
+  category: string;
+  budget: number;
+  month: string;
+  year: string;
+};
+
+export type Budget = {
+  id: number;
+  category: string;
+  budget: number;
+  month: string;
+  year: string;
+  expense: number;
 };

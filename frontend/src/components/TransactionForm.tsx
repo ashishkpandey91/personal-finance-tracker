@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/select";
 import { Calendar, Tag, FileText, IndianRupee } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hook";
-import { addNewCategory, getUserCategories } from "@/features/categorySlice";
+import { addNewCategory} from "@/features/categorySlice";
 import { addNewTransaction } from "@/features/transactionSlice";
+import { getBudgets } from "@/features/budgetSlice";
 
 // Zod schema for validation
 
@@ -37,12 +38,6 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
   const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
   const [showAddNew, setShowAddNew] = useState(false);
   const [newCategory, setNewCategory] = useState("");
-
-  useEffect(() => {
-    if (categoryState.loading !== "succeeded") {
-      dispatch(getUserCategories());
-    }
-  }, []);
 
   const handleAddNewCategory = async () => {
     if (!newCategory.trim()) return;
@@ -74,6 +69,8 @@ export const TransactionForm = ({ onClose }: TransactionFormProps) => {
     };
 
     dispatch(addNewTransaction(transitions));
+    dispatch(getBudgets());
+
     onClose();
   };
 

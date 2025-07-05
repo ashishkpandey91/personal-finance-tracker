@@ -60,38 +60,8 @@ export const addTransaction = async (req, res) => {
   }
 };
 
-export const getBudgets = async (req, res) => {
-  const userId = req.user.id;
-  try {
-    const result = await db.query(
-      `
-      SELECT c.category_name AS category,
-        SUM(CASE WHEN t.transaction_type = 'expense' THEN t.amount ELSE 0 END) AS spent
-      FROM expense_categories c
-      LEFT JOIN transactions t ON c.id = t.category_id
-      WHERE c.user_id = $1
-      GROUP BY c.category_name
-    `,
-      [userId]
-    );
 
-    // Example: hardcoded limits; you can extend with a separate `budgets` table
-    const budgets = result.rows.map((row) => ({
-      category: row.category,
-      spent: parseFloat(row.spent || 0),
-      limit: 500, // static for now
-    }));
 
-    res.json(budgets);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch budgets" });
-  }
-};
 
-export const updateBudget = async (req, res) => {
-  // If you store limits in a separate table, this would update that.
-  // For now, we’ll send back what frontend sent.
-  const { category, limit } = req.body;
-  return res.json({ category, limit, spent: 0 });
-};
+
+

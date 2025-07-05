@@ -24,14 +24,37 @@ export const financeService = {
     return res.data;
   },
 
-  addTransaction: async (transaction: Omit<Transaction, "id" | "timestamp">) => {
-    const res = await axios.post(`${BASE_URL}/transactions`, transaction, getAuthHeader());
-    
+  addTransaction: async (
+    transaction: Omit<Transaction, "id" | "timestamp">
+  ) => {
+    const res = await axios.post(
+      `${BASE_URL}/transactions`,
+      transaction,
+      getAuthHeader()
+    );
+
     return res.data;
   },
 
+  setBudget: async (
+    category: string,
+    budget: number,
+    month: string,
+    year: number
+  ) => {
+    const res = await axios.post(
+      `${BASE_URL}/budgets`,
+      { category, budget, month, year },
+      getAuthHeader()
+    );
+    return res.data;
+  },
   updateBudget: async (category: string, limit: number) => {
-    const res = await axios.put(`${BASE_URL}/budgets`, { category, limit }, getAuthHeader());
+    const res = await axios.put(
+      `${BASE_URL}/budgets`,
+      { category, limit },
+      getAuthHeader()
+    );
     return res.data;
   },
 };
