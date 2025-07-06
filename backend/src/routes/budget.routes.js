@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  deleteBudget,
   getBudgets,
   setBudget,
   updateBudget,
@@ -9,6 +10,7 @@ const budgetRouter = Router();
 
 budgetRouter.post("/", setBudget);
 budgetRouter.get("/", getBudgets);
-budgetRouter.put("/", updateBudget);
+budgetRouter.put("/:id", updateBudget);
+budgetRouter.delete("/:id", deleteBudget);
 
 export default budgetRouter;

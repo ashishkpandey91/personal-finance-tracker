@@ -41,6 +41,7 @@ export const FinanceTabsContent = ({
 }: FinanceTabsContentProps) => {
   const budgets = useAppSelector((state) => state.budget.entities);
   const [showSetBudgetForm, setShowSetBudgetForm] = useState(false);
+  const [showSetBudgetEditForm, setShowSetBudgetEditForm] = useState(false);
   const dispatch = useAppDispatch();
   const monthAbbrs = [
     "jan",
@@ -95,6 +96,138 @@ export const FinanceTabsContent = ({
           </Button>
 
           <Sheet open={showSetBudgetForm} onOpenChange={setShowSetBudgetForm}>
+            <SheetContent className="w-[98vw] sm:w-[540px] max-w-full">
+              <SheetHeader>
+                <SheetTitle>Update Budget</SheetTitle>
+                <SheetDescription>
+                  Only you can update budget.
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="flex flex-col gap-4 mt-4">
+                {/* Category Select (NO add new option) */}
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Select
+                    value={budgetForm.category}
+                    onValueChange={(value) =>
+                      setBudgetForm((prev) => ({ ...prev, category: value }))
+                    }
+                  >
+                    <SelectTrigger className="mt-1">
+                      <Tag className="h-4 w-4 mr-2 text-gray-400 capitalize" />
+                      <SelectValue
+                        placeholder="Select a category"
+                        className="capitalize"
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sortedCategories.map((category) => (
+                        <SelectItem
+                          key={category.id}
+                          value={String(category.id)}
+                          className="capitalize"
+                        >
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* budget Input */}
+                <div>
+                  <Label htmlFor="budget">Budget</Label>
+                  <div className="relative mt-1">
+                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="budget"
+                      type="number"
+                      placeholder="Enter budget amount"
+                      className="pl-10"
+                      value={budgetForm.budget}
+                      onChange={(e) =>
+                        setBudgetForm((prev) => ({
+                          ...prev,
+                          budget: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Month Dropdown */}
+                  <div>
+                    <Label htmlFor="month">Month</Label>
+                    <Select
+                      value={budgetForm.month}
+                      onValueChange={(value) =>
+                        setBudgetForm((prev) => ({ ...prev, month: value }))
+                      }
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select month" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {monthAbbrs.map((num, idx) => (
+                          <SelectItem key={num} value={num}>
+                            {new Date(0, idx).toLocaleString("default", {
+                              month: "long",
+                            })}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Year Dropdown */}
+                  <div>
+                    <Label htmlFor="year">Year</Label>
+                    <Select
+                      value={budgetForm.year}
+                      onValueChange={(value) =>
+                        setBudgetForm((prev) => ({ ...prev, year: value }))
+                      }
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 5 }, (_, i) => {
+                          const year = new Date().getFullYear() + i;
+                          return (
+                            <SelectItem key={year} value={String(year)}>
+                              {year}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 w-full">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSetBudgetForm(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={async () => {
+                      await handleAddNewBudget();
+                    }}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <Sheet open={showSetBudgetEditForm} onOpenChange={setShowSetBudgetEditForm}>
             <SheetContent className="w-[98vw] sm:w-[540px] max-w-full">
               <SheetHeader>
                 <SheetTitle>Set Budget</SheetTitle>

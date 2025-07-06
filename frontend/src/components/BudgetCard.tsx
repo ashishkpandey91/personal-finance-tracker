@@ -1,42 +1,105 @@
-// src/components/BudgetCard.tsx
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Target, Edit2, Check, X, AlertTriangle, MoreVertical } from "lucide-react";
+import { Target, MoreVertical, AlertTriangle } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { IndianRupee } from "lucide-react";
 import { Budget } from "@/types/finance";
+import { useAppDispatch, useAppSelector } from "@/store/hook";
+import { deleteBudget, updateBudget } from "@/features/budgetSlice";
 
 interface BudgetCardProps {
   budget: Budget;
-  onUpdateBudget: (category: string, budget: number) => void;
   onDeleteBudget: (id: string) => void;
   detailed?: boolean;
 }
 
-export const BudgetCard = ({ budget, onUpdateBudget, onDeleteBudget, detailed = false }: BudgetCardProps) => {
+export const BudgetCard = ({
+  budget,
+  onDeleteBudget,
+  detailed = false,
+}: BudgetCardProps) => {
+  const dispatch = useAppDispatch();
   const [isEditing, setIsEditing] = useState(false);
-  const [newLimit, setNewLimit] = useState(budget.budget);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+
+  const [budgetForm, setBudgetForm] = useState({
+    id: budget.id,
+    category: String(budget.category),
+    budget: String(budget.budget),
+    month:
+      budget.month ||
+      new Date().toLocaleString("default", { month: "short" }).toLowerCase(),
+    year: budget.year || String(new Date().getFullYear()),
+  });
 
   const percentage = Math.min((budget.expense / budget.budget) * 100, 100);
   const isOverBudget = budget.expense > budget.budget;
   const isNearLimit = percentage > 80 && !isOverBudget;
 
-  const handleSave = () => {
-    if (!isNaN(newLimit) && newLimit > 0) {
-      onUpdateBudget(budget.category, newLimit);
-      setIsEditing(false);
-    }
+  const categoryState = useAppSelector((state) => state.category);
+  const sortedCategories = [...categoryState.entities]
+    .filter(Boolean)
+    .sort((a, b) => {
+      if (a.name.toLowerCase() === "others") return 1;
+      if (b.name.toLowerCase() === "others") return -1;
+      return 0;
+    });
+
+  const handleEditClick = () => {
+    setIsDropdownOpen(false);
+    setIsEditing(true);
   };
 
-  const handleCancel = () => {
-    setNewLimit(budget.budget);
+  const handleDeleteClick = () => {
+    setIsDropdownOpen(false);
+    setIsAlertDialogOpen(true); // Open the dialog
+  };
+
+  const handleConfirmDelete = async () => {
+    await dispatch(deleteBudget(budgetForm.id));
+    setIsAlertDialogOpen(false);
+    onDeleteBudget(budgetForm.id);
+  };
+
+  const handleCancelDelete = () => {
+    setIsAlertDialogOpen(false);
+  };
+
+  const handleUpdateBudget = async () => {
+    await dispatch(
+      updateBudget({
+        id: budgetForm.id,
+        categoryId: budgetForm.category,
+        budget: parseFloat(budgetForm.budget),
+        month: budgetForm.month,
+        year: budgetForm.year,
+      })
+    );
     setIsEditing(false);
   };
-
-
 
   return (
     <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -44,7 +107,9 @@ export const BudgetCard = ({ budget, onUpdateBudget, onDeleteBudget, detailed = 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-blue-600" />
-            <CardTitle className="text-lg font-bold text-gray-800">{budget.category}</CardTitle>
+            <CardTitle className="text-lg font-bold text-gray-800">
+              {budget.category}
+            </CardTitle>
           </div>
           <div className="flex items-center gap-2">
             {isOverBudget && (
@@ -54,57 +119,46 @@ export const BudgetCard = ({ budget, onUpdateBudget, onDeleteBudget, detailed = 
               </Badge>
             )}
             {isNearLimit && (
-              <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+              <Badge
+                variant="outline"
+                className="text-xs text-orange-600 border-orange-200"
+              >
                 Near Limit
               </Badge>
             )}
 
-            {isEditing ? (
-              <div className="flex gap-1">
+            <DropdownMenu.Root open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+              <DropdownMenu.Trigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleSave}
-                  className="p-2 hover:bg-green-100 rounded-full text-green-600"
+                  className="p-2 hover:bg-gray-100 rounded-full"
                 >
-                  <Check className="h-3 w-3" />
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancel}
-                  className="p-2 hover:bg-red-100 rounded-full text-red-600"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ) : (
-              <DropdownMenu.Root>
-                <DropdownMenu.Trigger asChild>
-                  <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-100 rounded-full">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenu.Trigger>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
                 <DropdownMenu.Content
                   side="bottom"
                   align="end"
-                  className="bg-white border shadow-md rounded-md py-1 w-28 z-50"
+                  className="bg-white border shadow-md rounded-md py-1 w-28 z-[9999]"
+                  sideOffset={5}
                 >
                   <DropdownMenu.Item
                     className="text-sm px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => setIsEditing(true)}
+                    onClick={handleEditClick}
                   >
                     Update
                   </DropdownMenu.Item>
                   <DropdownMenu.Item
                     className="text-sm px-3 py-2 text-red-600 hover:bg-red-100 cursor-pointer"
-                    onClick={() => onDeleteBudget(budget.id)}
+                    onClick={handleDeleteClick}
                   >
                     Delete
                   </DropdownMenu.Item>
                 </DropdownMenu.Content>
-              </DropdownMenu.Root>
-            )}
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
           </div>
         </div>
       </CardHeader>
@@ -113,26 +167,20 @@ export const BudgetCard = ({ budget, onUpdateBudget, onDeleteBudget, detailed = 
         <div className="space-y-4">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Spent</span>
-            <span className={`font-bold ${isOverBudget ? "text-red-600" : "text-gray-800"}`}>
+            <span
+              className={`font-bold ${
+                isOverBudget ? "text-red-600" : "text-gray-800"
+              }`}
+            >
               ₹{Number(budget.expense).toFixed(2)}
             </span>
           </div>
 
           <div className="flex justify-between text-sm items-center">
             <span className="text-gray-600">Budget</span>
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">₹</span>
-                <Input
-                  type="number"
-                  value={newLimit}
-                  onChange={(e) => setNewLimit(Number(e.target.value))}
-                  className="w-20 h-8 text-sm"
-                />
-              </div>
-            ) : (
-              <span className="font-bold text-gray-800">₹{Number(budget.budget).toFixed(2)}</span>
-            )}
+            <span className="font-bold text-gray-800">
+              ₹{Number(budget.budget).toFixed(2)}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -140,12 +188,18 @@ export const BudgetCard = ({ budget, onUpdateBudget, onDeleteBudget, detailed = 
               value={percentage}
               className="h-2"
               style={{
-                background: isOverBudget ? "#fecaca" : isNearLimit ? "#fed7aa" : "#e5e7eb",
+                background: isOverBudget
+                  ? "#fecaca"
+                  : isNearLimit
+                  ? "#fed7aa"
+                  : "#e5e7eb",
               }}
             />
             <div className="flex justify-between text-xs text-gray-500">
               <span>{percentage.toFixed(0)}% used</span>
-              <span>₹{(budget.budget - budget.expense).toFixed(2)} remaining</span>
+              <span>
+                ₹{(budget.budget - budget.expense).toFixed(2)} Remaining
+              </span>
             </div>
           </div>
 
@@ -157,7 +211,13 @@ export const BudgetCard = ({ budget, onUpdateBudget, onDeleteBudget, detailed = 
               </div>
               <div className="flex justify-between">
                 <span>Projected month:</span>
-                <span className={budget.expense * 30 > budget.budget ? "text-red-600" : "text-green-600"}>
+                <span
+                  className={
+                    budget.expense * 30 > budget.budget
+                      ? "text-red-600"
+                      : "text-green-600"
+                  }
+                >
                   ₹{(budget.expense * 30).toFixed(2)}
                 </span>
               </div>
@@ -165,6 +225,77 @@ export const BudgetCard = ({ budget, onUpdateBudget, onDeleteBudget, detailed = 
           )}
         </div>
       </CardContent>
+
+      {/* Update Budget Sheet */}
+      <Sheet open={isEditing} onOpenChange={setIsEditing}>
+        <SheetContent className="w-[98vw] sm:w-[540px] max-w-full">
+          <SheetHeader>
+            <SheetTitle>Update Budget</SheetTitle>
+            <SheetDescription>
+              Update the budget for {budget.category}.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex flex-col gap-4 mt-4">
+            <div>
+              <Label htmlFor="budget">Budget</Label>
+              <div className="relative mt-1">
+                <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="budget"
+                  type="number"
+                  placeholder="Enter budget amount"
+                  className="pl-10"
+                  value={budgetForm.budget}
+                  onChange={(e) =>
+                    setBudgetForm((prev) => ({
+                      ...prev,
+                      budget: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4 w-full">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={async () => {
+                  await handleUpdateBudget();
+                }}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the budget
+              for {budget.category} and remove its data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
