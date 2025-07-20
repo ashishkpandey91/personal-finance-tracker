@@ -19,7 +19,8 @@ export const CategoryChart = ({ transactions }: CategoryChartProps) => {
         existing.value += Number(transaction.amount);
       } else {
         acc.push({
-          name: transaction.category,
+          // name: transaction.category,
+          name: transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1),
           value: Number(transaction.amount)
         });
       }

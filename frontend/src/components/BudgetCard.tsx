@@ -107,7 +107,7 @@ export const BudgetCard = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-blue-600" />
-            <CardTitle className="text-lg font-bold text-gray-800">
+            <CardTitle className="text-lg font-bold text-gray-800 capitalize">
               {budget.category}
             </CardTitle>
           </div>

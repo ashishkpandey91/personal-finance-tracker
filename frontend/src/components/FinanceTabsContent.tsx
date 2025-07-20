@@ -118,7 +118,6 @@ export const FinanceTabsContent = ({
                       <Tag className="h-4 w-4 mr-2 text-gray-400 capitalize" />
                       <SelectValue
                         placeholder="Select a category"
-                        className="capitalize"
                       />
                     </SelectTrigger>
                     <SelectContent>
@@ -128,7 +127,9 @@ export const FinanceTabsContent = ({
                           value={String(category.id)}
                           className="capitalize"
                         >
-                          {category.name}
+                          {/* {category.name} */}
+                          {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -364,7 +365,7 @@ export const FinanceTabsContent = ({
           {budgets.length === 0 ? (
             <div className="col-span-full flex flex-col gap-8 justify-center items-center">
               <p className="text-gray-500">
-                You haven't made any transactions yet.
+                You haven't set any budget yet.
               </p>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

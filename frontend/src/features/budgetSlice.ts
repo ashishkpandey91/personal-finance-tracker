@@ -52,7 +52,7 @@ export const deleteBudget = createAsyncThunk(
   "budgets/delete",
   async (id: string) => {
     await authApi.delete(`/budgets/${id}`);
-    return id; // just return the ID so we can remove from state
+    return id;
   }
 );
 
