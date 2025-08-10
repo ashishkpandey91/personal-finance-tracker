@@ -1,4 +1,3 @@
-// src/features/authSlice.ts
 import { User } from "@/types/user";
 import { createSlice } from "@reduxjs/toolkit";
 
