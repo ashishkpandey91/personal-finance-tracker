@@ -217,7 +217,7 @@ The application will be available at `http://localhost:5173`.
 ## Project Structure
 
 ```
-major-project-mca/
+personal-finance-tracker/
 ├── backend/
 │   ├── src/
 │   │   ├── config/          # Configuration files
