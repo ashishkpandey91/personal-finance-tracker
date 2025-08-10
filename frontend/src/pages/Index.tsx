@@ -67,11 +67,12 @@ const Index = () => {
             onValueChange={setActiveTab}
             className="space-y-6"
           >
-            <TabsList className="hidden md:grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm">
+            <TabsList className="hidden md:grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+              <TabsTrigger value="transactions">History</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="news">News</TabsTrigger>
+              <TabsTrigger value="news">Info</TabsTrigger>
+              <TabsTrigger value="currency_converter">Convert</TabsTrigger>
             </TabsList>
 
             <FinanceTabsContent

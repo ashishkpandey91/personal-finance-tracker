@@ -3,7 +3,7 @@ import { SpendingChart } from "./SpendingChart";
 import { CategoryChart } from "./CategoryChart";
 import { TransactionList } from "./TransactionList";
 import { BudgetCard } from "./BudgetCard";
-import { FinanceNews } from "./FinanceNews";
+import { CurrencyExchange } from "./CurrencyExchange";
 import { Transaction } from "@/types/finance";
 import { FinanceHeader } from "./FinanceHeader";
 import { OverviewCards } from "./OverviewCards";
@@ -29,6 +29,7 @@ import { Label } from "@/components/ui/label";
 import { IndianRupee, Tag } from "lucide-react";
 import { Input } from "./ui/input";
 import { createBudget } from "@/features/budgetSlice";
+import CurrencyConverter from "./CurrencyConverter";
 
 interface FinanceTabsContentProps {
   transactions: Transaction[];
@@ -441,7 +442,11 @@ export const FinanceTabsContent = ({
       </TabsContent>
 
       <TabsContent value="news" className="space-y-6">
-        <FinanceNews />
+        <CurrencyExchange />
+      </TabsContent>
+      <TabsContent value="currency_converter" className="space-y-6">
+        {/* <FinanceNews /> */}
+        <CurrencyConverter />
       </TabsContent>
     </>
   );

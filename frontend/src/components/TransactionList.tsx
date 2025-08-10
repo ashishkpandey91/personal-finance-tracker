@@ -156,7 +156,7 @@ export const TransactionList = ({ transactions }: TransactionListProps) => {
                       : "text-red-600"
                   }`}
                 >
-                  {transaction.type === "income" ? "+" : "-"}$
+                  {transaction.type === "income" ? "+" : "-"}₹
                   {Number(transaction.amount).toFixed(2)}
                 </div>
               </div>

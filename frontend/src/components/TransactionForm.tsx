@@ -16,8 +16,6 @@ import { addNewCategory} from "@/features/categorySlice";
 import { addNewTransaction } from "@/features/transactionSlice";
 import { getBudgets } from "@/features/budgetSlice";
 
-// Zod schema for validation
-
 
 interface TransactionFormProps {
   onClose: () => void;

@@ -1,6 +1,6 @@
 
 import { Card } from '@/components/ui/card';
-import { BarChart, CreditCard, TrendingUp, Newspaper, Home } from 'lucide-react';
+import { CreditCard, TrendingUp, Newspaper, Home, RefreshCw } from 'lucide-react';
 
 interface MobileBottomNavProps {
   activeTab: string;
@@ -10,9 +10,10 @@ interface MobileBottomNavProps {
 export const MobileBottomNav = ({ activeTab, onTabChange }: MobileBottomNavProps) => {
   const tabs = [
     { id: 'overview', label: 'Home', icon: Home },
-    { id: 'transactions', label: 'Transactions', icon: CreditCard },
+    { id: 'transactions', label: 'History', icon: CreditCard },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-    { id: 'news', label: 'News', icon: Newspaper },
+    { id: 'news', label: 'Info', icon: Newspaper },
+    { id: 'currency_converter', label: 'Convert', icon: RefreshCw  },
   ];
 
   return (
