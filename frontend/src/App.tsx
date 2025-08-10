@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import authService from "@/services/auth";
+import authService from "@/services/auth.ts";
 import { login, logout } from "@/features/authSlice";
 import { useAppDispatch } from "@/store/hook";
 
