@@ -7,6 +7,7 @@ const client = new Client({
   host: envConfig.get("DB_HOST"),
   port: envConfig.get("DB_PORT"),
   database: envConfig.get("DB_NAME"),
+  ssl: { rejectUnauthorized: false }
 });
 
 client.on("error", (err) => {
