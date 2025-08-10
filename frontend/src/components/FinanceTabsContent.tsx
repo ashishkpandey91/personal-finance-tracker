@@ -3,7 +3,6 @@ import { SpendingChart } from "./SpendingChart";
 import { CategoryChart } from "./CategoryChart";
 import { TransactionList } from "./TransactionList";
 import { BudgetCard } from "./BudgetCard";
-import { CurrencyExchange } from "./CurrencyExchange";
 import { Transaction } from "@/types/finance";
 import { FinanceHeader } from "./FinanceHeader";
 import { OverviewCards } from "./OverviewCards";
@@ -439,14 +438,6 @@ export const FinanceTabsContent = ({
           <SpendingChart transactions={transactions} />
           <CategoryChart transactions={transactions} />
         </div>
-      </TabsContent>
-
-      <TabsContent value="news" className="space-y-6">
-        <CurrencyExchange />
-      </TabsContent>
-      <TabsContent value="currency_converter" className="space-y-6">
-        {/* <FinanceNews /> */}
-        <CurrencyConverter />
       </TabsContent>
     </>
   );
